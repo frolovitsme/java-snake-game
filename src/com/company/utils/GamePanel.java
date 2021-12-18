@@ -1,6 +1,8 @@
 package com.company.utils;
 
 //import com.company.entities.Apple;
+
+import com.company.entities.Apple;
 import com.company.entities.Snake;
 
 import javax.swing.*;
@@ -13,8 +15,10 @@ import static com.company.utils.Constants.*;
 public class GamePanel extends JPanel implements ActionListener {
 
     private boolean running = false;
-    private static final int DELAY = 75;
+    private boolean isAppleExist = false;
+    private static final int DELAY = 250;
     private Timer timer;
+    private Apple apple;
 
     public GamePanel() {
         setBorder(BorderFactory.createLineBorder(Color.RED));
@@ -36,12 +40,10 @@ public class GamePanel extends JPanel implements ActionListener {
     изменяем стандартный компонент
      */
     @Override
-    protected void paintComponent(Graphics graphics) {
-        Graphics2D g = (Graphics2D) graphics;
-        g.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);
+    protected void paintComponent(Graphics g) {
         super.paintComponent(g);
         this.drawMarkup(g);
-//        this.drawApple(g);
+        this.drawApple(g);
         this.drawSnake(g);
         repaint();
     }
@@ -59,16 +61,19 @@ public class GamePanel extends JPanel implements ActionListener {
     /*
     рисуем яблоко
      */
-//    private void drawApple(Graphics g) {
-//        Apple apple = new Apple();
-//        g.setColor(apple.getColor());
-//        g.fillOval(
-//                apple.getCoordinates().getX(),
-//                apple.getCoordinates().getY(),
-//                UNIT_SIZE,
-//                UNIT_SIZE
-//        );
-//    }
+    private void drawApple(Graphics g) {
+        if (!isAppleExist) {
+            apple = new Apple();
+            isAppleExist = true;
+        }
+        g.setColor(apple.getColor());
+        g.fillOval(
+                (int) apple.getPoint().getX(),
+                (int) apple.getPoint().getY(),
+                UNIT_SIZE,
+                UNIT_SIZE
+        );
+    }
 
     /*
     рисуем змею
@@ -81,10 +86,34 @@ public class GamePanel extends JPanel implements ActionListener {
                 UNIT_SIZE,
                 UNIT_SIZE
         );
+
+        int size = Snake.getBody().size();
+        if (size > 0) {
+            for (int i = 0; i < size; i++) {
+                g.setColor(Color.CYAN);
+                g.fillRect(
+                        (int) Snake.getBody().get(i).getPoint().getX(),
+                        (int) Snake.getBody().get(i).getPoint().getY(),
+                        UNIT_SIZE,
+                        UNIT_SIZE
+                );
+            }
+        }
+    }
+
+    public boolean isHit() {
+        if (Snake.getHead().getPoint().distance(apple.getPoint()) == 0.0) {
+            return true;
+        } else
+            return false;
     }
 
     @Override
     public void actionPerformed(ActionEvent e) {
         Snake.move();
+        if (isHit()) {
+            isAppleExist = false;
+            Snake.addTail();
+        }
     }
 }

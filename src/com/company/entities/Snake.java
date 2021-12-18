@@ -9,31 +9,34 @@ public class Snake {
     private static Color color = Color.GREEN;
 
     private static Head head = new Head(new Point(0, 0));
-    private static ArrayList<Tail> body;
-
-    public static void addTail() {
-        int size = body.size();
-        if (size > 1) {
-            Point newPoint = new Point(
-                    (int) body.get(size - 1).getPoint().getX(),
-                    (int) body.get(size - 1).getPoint().getY()
-            );
-            body.add(new Tail(newPoint));
-        }
-    }
+    private static ArrayList<Tail> body = new ArrayList<>();
 
     public static Color getColor() {
         return color;
     }
 
+    public static Head getHead() {
+        return head;
+    }
+
+    public static ArrayList<Tail> getBody() {
+        return body;
+    }
+
     public static void move() {
-        if (body != null) {
-            if (body.size() >= 2) {
-
+        if (body.size() >= 2) {
+            for (int i = body.size() - 1; i >= 1; i--) {
+                body.get(i).setPoint(new Point(
+                        (int) body.get(i - 1).getPoint().getX(),
+                        (int) body.get(i - 1).getPoint().getY()
+                ));
             }
-            if (body.size() == 1) {
-
-            }
+        }
+        if (body.size() >= 1) {
+            body.get(0).setPoint(new Point(
+                    (int) head.getPoint().getX(),
+                    (int) head.getPoint().getY()
+            ));
         }
 
         switch (head.getDirection()) {
@@ -64,11 +67,22 @@ public class Snake {
         }
     }
 
-    public static Head getHead() {
-        return head;
-    }
-
-    public static ArrayList<Tail> getBody() {
-        return body;
+    public static void addTail() {
+        int size = body.size();
+        if (size < 1) {
+            body.add(new Tail(
+                    new Point(
+                            (int) head.getPoint().getX(),
+                            (int) head.getPoint().getY()
+                    )
+            ));
+        } else {
+            body.add(new Tail(
+                    new Point(
+                            (int) body.get(size - 1).getPoint().getX(),
+                            (int) body.get(size - 1).getPoint().getY()
+                    )
+            ));
+        }
     }
 }
