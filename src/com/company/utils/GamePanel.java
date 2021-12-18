@@ -4,6 +4,7 @@ package com.company.utils;
 
 import com.company.entities.Apple;
 import com.company.entities.Snake;
+import com.company.entities.Tail;
 
 import javax.swing.*;
 import java.awt.*;
@@ -42,10 +43,14 @@ public class GamePanel extends JPanel implements ActionListener {
     @Override
     protected void paintComponent(Graphics g) {
         super.paintComponent(g);
-        this.drawMarkup(g);
-        this.drawApple(g);
-        this.drawSnake(g);
-        repaint();
+        if (running) {
+            this.drawMarkup(g);
+            this.drawApple(g);
+            this.drawSnake(g);
+            repaint();
+        } else {
+            gameOver(g);
+        }
     }
 
     /*
@@ -101,19 +106,41 @@ public class GamePanel extends JPanel implements ActionListener {
         }
     }
 
-    public boolean isHit() {
-        if (Snake.getHead().getPoint().distance(apple.getPoint()) == 0.0) {
-            return true;
-        } else
-            return false;
+    private void gameOver(Graphics g) {
+        g.setColor(Color.RED);
+        g.setFont(new Font("Ink Free", Font.BOLD, 75));
+        FontMetrics metrics = getFontMetrics(g.getFont());
+        g.drawString("Game Over", (SCREEN_WIDTH - metrics.stringWidth("Game Over")) / 2, SCREEN_HEIGHT / 2);
+
+        timer.stop();
+    }
+
+    private boolean isHit() {
+        return Snake.getHead().getPoint().distance(apple.getPoint()) == 0.0;
+    }
+
+    private boolean checkBarrier() {
+        return Snake.getHead().getPoint().getX() == SCREEN_WIDTH ||
+                Snake.getHead().getPoint().getX() < 0 ||
+                Snake.getHead().getPoint().getY() == SCREEN_HEIGHT ||
+                Snake.getHead().getPoint().getY() < 0 ||
+                Snake.getBody().stream()
+                        .map(Tail::getPoint)
+                        .anyMatch(point -> point.distance(Snake.getHead().getPoint()) == 0.0 &&
+                                Snake.getBody().get(0).getPoint().distance(point) != 0.0);
     }
 
     @Override
     public void actionPerformed(ActionEvent e) {
-        Snake.move();
-        if (isHit()) {
-            isAppleExist = false;
-            Snake.addTail();
+        if (running) {
+            Snake.move();
+            if (isHit()) {
+                isAppleExist = false;
+                Snake.addTail();
+            }
+            if (checkBarrier()) {
+                running = false;
+            }
         }
     }
 }
