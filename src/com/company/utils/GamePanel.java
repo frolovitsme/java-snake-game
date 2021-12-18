@@ -18,6 +18,7 @@ public class GamePanel extends JPanel implements ActionListener {
     private static final int DELAY = 250;
     private Timer timer;
     private Apple apple;
+    private int score = 0;
 
     public GamePanel() {
         setBorder(BorderFactory.createLineBorder(Color.RED));
@@ -35,25 +36,37 @@ public class GamePanel extends JPanel implements ActionListener {
         timer.start();
     }
 
-    /*
-    изменяем стандартный компонент
-     */
+    private void gameOver(Graphics g) {
+        g.setColor(Color.RED);
+        g.setFont(new Font("Impact", Font.BOLD, 75));
+        FontMetrics metrics = getFontMetrics(g.getFont());
+        g.drawString("Game Over", (SCREEN_WIDTH - metrics.stringWidth("Game Over")) / 2, (SCREEN_HEIGHT / 2) - 50);
+        g.drawString("Score: " + score, (SCREEN_WIDTH - metrics.stringWidth("Score: " + score)) / 2, (SCREEN_HEIGHT / 2) + 50);
+
+        timer.stop();
+    }
+
+    private void setScore(Graphics g) {
+        g.setColor(Color.WHITE);
+        g.setFont(new Font("Impact", Font.BOLD, 25));
+        FontMetrics metrics = getFontMetrics(g.getFont());
+        g.drawString("Score: " + score, (SCREEN_WIDTH - metrics.stringWidth("Score: " + score)) / 2, 25);
+    }
+
     @Override
     protected void paintComponent(Graphics g) {
         super.paintComponent(g);
         if (running) {
-            this.drawMarkup(g);
-            this.drawApple(g);
-            this.drawSnake(g);
+            drawMarkup(g);
+            drawApple(g);
+            drawSnake(g);
+            setScore(g);
             repaint();
         } else {
             gameOver(g);
         }
     }
 
-    /*
-    рисуем разметку на поле
-     */
     private void drawMarkup(Graphics g) {
         for (int i = 0; i < SCREEN_HEIGHT / UNIT_SIZE; i++) {
             g.drawLine(i * UNIT_SIZE, 0, i * UNIT_SIZE, SCREEN_HEIGHT);
@@ -61,9 +74,6 @@ public class GamePanel extends JPanel implements ActionListener {
         }
     }
 
-    /*
-    рисуем яблоко
-     */
     private void drawApple(Graphics g) {
         if (!isAppleExist) {
             apple = new Apple();
@@ -78,9 +88,6 @@ public class GamePanel extends JPanel implements ActionListener {
         );
     }
 
-    /*
-    рисуем змею
-     */
     private void drawSnake(Graphics g) {
         g.setColor(Snake.getColor());
         g.fillRect(
@@ -102,15 +109,6 @@ public class GamePanel extends JPanel implements ActionListener {
                 );
             }
         }
-    }
-
-    private void gameOver(Graphics g) {
-        g.setColor(Color.RED);
-        g.setFont(new Font("Ink Free", Font.BOLD, 75));
-        FontMetrics metrics = getFontMetrics(g.getFont());
-        g.drawString("Game Over", (SCREEN_WIDTH - metrics.stringWidth("Game Over")) / 2, SCREEN_HEIGHT / 2);
-
-        timer.stop();
     }
 
     private boolean isHit() {
@@ -135,6 +133,7 @@ public class GamePanel extends JPanel implements ActionListener {
             if (isHit()) {
                 isAppleExist = false;
                 Snake.addTail();
+                score++;
             }
             if (checkBarrier()) {
                 running = false;
