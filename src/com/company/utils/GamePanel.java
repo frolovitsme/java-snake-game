@@ -1,7 +1,5 @@
 package com.company.utils;
 
-//import com.company.entities.Apple;
-
 import com.company.entities.Apple;
 import com.company.entities.Snake;
 import com.company.entities.Tail;
